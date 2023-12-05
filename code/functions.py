@@ -20,11 +20,6 @@ cps_list = []
 
 data_directory  = os.path.join(os.path.expanduser("~"), "impulse_data")
 
-# define target peak position at sample
-def target_peak_position(sample_length):
-    # return int((sample_length-1)/2)
-    return int((sample_length-1) * 0.31)
-
 # Finds pulses in string of data over a given threshold
 def find_pulses(left_channel):
     samples =[]
@@ -44,7 +39,26 @@ def average_pulse(sum_pulse, count):
         average.append(x / count)
     return average 
 
+def normalise_pulse_min_max(s_min, s_max, average):
+    return normalise_pulse_min_max_h(24576, s_min, s_max, average)
+
     # Normalises the average pulse shape
+def normalise_pulse_min_max_h(target_h, s_min, s_max, average):
+    normalised = []
+    h = s_max - s_min
+    if h != 0:
+        amp = target_h / h
+    else:
+        amp = 1
+    mean = sum(average) / len(average)   
+    # normalised = [n - mean for n in average]  
+    # normalised = [n - mean for n in average]  
+    # normalised_int = [int(x) for x in normalised]
+    # normalised_int = [int((x - mean) * amp) for x in average]
+    normalised_int = [((x - mean) * amp) for x in average]
+    return normalised_int
+    # Normalises the average pulse shape
+
 def normalise_pulse_h(target_h, average):
     normalised = []
     h = max(average) - min(average)
@@ -61,21 +75,25 @@ def normalise_pulse_h(target_h, average):
 
     # Normalises the average pulse shape
 def normalise_pulse(average):
-    normalised = []
-    mean = sum(average) / len(average)   
-    # normalised = [n - mean for n in average]  
-    # normalised = [n - mean for n in average]  
-    # normalised_int = [int(x) for x in normalised]
-    normalised_int = [int(x - mean) for x in average]
-    return normalised_int
+    return normalise_pulse_h(24576, average)
+#n#    normalised = []
+#n#    mean = sum(average) / len(average)   
+#n#    # normalised = [n - mean for n in average]  
+#n#    # normalised = [n - mean for n in average]  
+#n#    # normalised_int = [int(x) for x in normalised]
+#n#    normalised_int = [int(x - mean) for x in average]
+#n#    return normalised_int
 
     # Normalised pulse samples less normalised shape samples squared summed and rooted
 def distortion(normalised, shape):
     product = [(x - y)**2 for x, y in zip(shape, normalised)]
     # distortion = int(math.sqrt(sum(product)))
-    distortion = int((sum(product))/24576)	# 603979776 == 24576**2
+    # distortion = int((sum(product))/24576)	# 603979776 == 24576**2
 
-    return distortion
+    return int((sum(product))/24576)
+    #return int(math.sqrt(sum(product)))
+
+
     # Function calculates pulse height
 def pulse_height(samples):
     return max(samples)-min(samples)
@@ -92,18 +110,33 @@ def pulse_height_q(samples):
     y_extremum = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
     return y_extremum-min(samples)
 
-def pulse_height_q2(m_idx, samples):
+def pulse_height_q2(m_idx, s_min, samples):
 #    if m_idx == 0 or m_idx == len(samples)-1:
-#    	return max(samples)-min(samples)
-    x_parab = [m_idx-1, m_idx, m_idx+1]
+#    	return max(samples)-s_min
+    x_parab = [1, 2, 3]
     y_parab = [samples[m_idx-1], samples[m_idx], samples[m_idx+1]]
+    x_extremum = m_idx
+    y_extremum = samples[m_idx]
+    if samples[m_idx-1] == samples[m_idx+1]:
+        return y_extremum-s_min
     parab_coeff = np.polyfit(x_parab, y_parab, 2)
     # x_max = -b/2a
-    x_extremum = 0 - parab_coeff[1] / parab_coeff[0] / 2.
+#check#    if parab_coeff[0] > 0. or parab_coeff[1] < 0.:
+#check#        print("parabola k", samples[m_idx-1], samples[m_idx], samples[m_idx+1], 
+#check#	    " -> ", parab_coeff[0], parab_coeff[1], parab_coeff[2])
+#check#        return 0
+    x_extremum = - parab_coeff[1] / parab_coeff[0] / 2.
+#check#    if x_extremum >= 1. and x_extremum <= 3.:
     y_extremum = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
-    if y_extremum < samples[m_idx]:
-        y_extremum = samples[m_idx]
-    return y_extremum-min(samples)
+#check#    else:
+#check#        print("parabola x", samples[m_idx-1], samples[m_idx], samples[m_idx+1], 
+#check#	    " -> ", parab_coeff[0], parab_coeff[1], parab_coeff[2], "x y: ", x_extremum, y_extremum)
+#check#    if y_extremum < samples[m_idx]:
+#check#        print("parabola e", samples[m_idx-1], samples[m_idx], samples[m_idx+1], 
+#check#	    " -> ", parab_coeff[0], parab_coeff[1], parab_coeff[2], "x y: ", x_extremum, y_extremum)
+#check#        return 0
+        #y_extremum = samples[m_idx]
+    return y_extremum-s_min
 
     # Function to create bin_array 
 def create_bin_array(start, stop, bin_size):

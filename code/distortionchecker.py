@@ -85,12 +85,12 @@ def distortion_finder():
 			samples = [flip * x for x in samples]
 			if samples[peak] >= max(samples) and (max(samples)-min(samples)) > threshold and samples[peak] < 32768:
 				# Function normalises sample to zero
-				normalised = fn.normalise_pulse_h(24576, samples)
+				normalised = fn.normalise_pulse(samples)
 				# Converts normalised to integers
 				normalised_int = [int(round(x)) for x in normalised]
 				# Calculates distortion
 				distortion = fn.distortion(normalised, shape)
-				print("dist = %12.2f" % (distortion))
+				print("%4d dist = %12.2f" % (n, distortion))
 				# Append distortion
 				distortion_list.append(distortion)
 				distortion_list.sort()
