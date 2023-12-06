@@ -85,6 +85,8 @@ def show_tab2():
     max_seconds     = settings[26]
     t_interval      = settings[27]
 
+    if max_counts < 100:
+        max_counts = 111111000
     if max_counts == 0:
         counts_warning = 'red'
     else: 

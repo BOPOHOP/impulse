@@ -79,13 +79,17 @@ def pulsecatcher(mode):
 	print(tolerance)
 
 	global_cps 		= 0
-	global_counts 	= 0
+	global_counts 		= 0
+	interval_counts 	= 0
 	elapsed 		= 0
 
 
 	elapsed 		= 0
 	grand_cps 		= 0
 	read_size 		= 0
+
+	if max_counts < 100:
+		max_counts = 111111000
 
 	# Open the selected audio input device
 	stream = p.open(
@@ -174,8 +178,9 @@ def pulsecatcher(mode):
 					if bin_index < bins:
 						histogram[bin_index] 	+= 1
 						histogram_3d[bin_index] += 1 
-						global_counts  			+= 1	
-						global_cps 				+= 1
+						global_counts  		+= 1	
+						global_cps 		+= 1
+						interval_counts 	+= 1
 
 #Q1#						h_mult = (height - samples[peak] + s_min) / height
 						delta_h = int(height/bin_size) - int(h_old/bin_size)
@@ -221,13 +226,14 @@ def pulsecatcher(mode):
 			reject_percent = 0
 			if global_counts != 0 and elapsed != 0:
 				reject_percent = rejected_counts/global_counts * 100;
-			if global_cps != 0 and elapsed != 0:
-				d1 = dist_sum/global_cps
-				d2 = h_mult_sum/global_cps*100
-				delta_h_avg = delta_h_sum / global_cps
+			if interval_counts != 0 and elapsed != 0:
+				d1 = dist_sum/interval_counts
+				d2 = h_mult_sum/interval_counts*100
+				delta_h_avg = delta_h_sum / interval_counts
 			else:
 				d1 = 0
 				d2 = 0
+				delta_h_avg = 0
 
 			print("elapsed=%4d cps=%7.2f reject_cps=%6.2f %6.2f%% rate=%.2f dist_avg = %10.2f h_mult_avg = %6.2f%% dh=%4.1f" % (
 					elapsed, 
@@ -240,11 +246,13 @@ def pulsecatcher(mode):
 
 			h_mult_sum = 0.
 			dist_sum = 0.
-			delta_h_sum = 0
+			delta_h_sum = 0.
 
 			fn.write_cps_json(filename, global_cps)
 			global_cps = 0
+			interval_counts = 0
 	
 	p.terminate() # closes stream when done
+	print("pulsecatcher stop")
 	return						
 											
