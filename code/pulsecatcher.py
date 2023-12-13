@@ -59,6 +59,7 @@ def pulsecatcher(mode):
 	stop 			= bins * bin_size
 	histogram 		= [0] * bins
 	histogram_3d 	= [0] * bins
+	histogram_dist 	= [0] * bins
 	audio_format 	= pyaudio.paInt16
 	device_channels = fn.get_max_input_channels(device)
 
@@ -66,7 +67,7 @@ def pulsecatcher(mode):
 	shapestring = fn.load_shape()
 
 	# Converts string to float
-	shape 		= [int(x) for x in shapestring]
+	shape 		= fn.normalise_pulse([int(x) for x in shapestring])
 	samples 	= []
 	pulses 		= []
 	left_data 	= []
@@ -127,16 +128,28 @@ def pulsecatcher(mode):
 		for i, sample in enumerate(left_channel[:-sample_length]):
 			if i < skip_to:
 				continue
+			# simple max check...
+			s_max = left_channel[i+peak]
+			if (s_max < left_channel[i+peak+1]):
+				continue
+			if (s_max < left_channel[i+peak+2]):
+				continue
+#			if (s_max < left_channel[i+peak+3]):
+#				continue
+			if (s_max < left_channel[i+peak-1]):
+				continue
 			# iterate through one sample lenghth at the time in quick succession, ta-ta-ta-ta-ta...
 			samples = left_channel[i:i+sample_length]
 			# Function calculates pulse height of all samples 
 			# height = fn.pulse_height(samples)
 			# Filter out noise
-			if ((s_max := samples[peak]) == max(samples) 
+			# if ((s_max := samples[peak]) == max(samples) 
+			if (s_max == max(samples) 
 #q#					and (height := fn.pulse_height_q2(peak, samples)) > threshold 
 					and (height := samples[peak] - (s_min := min(samples))) > threshold 
 					and samples[peak] < 32768):
 				# Function normalises sample to zero and converts to integer
+				# normalised = fn.normalise_pulse(samples)
 				normalised = fn.normalise_pulse_min_max(s_min, s_max, samples)
 				# Compares pulse to sample and calculates distortion number
 				distortion = fn.distortion(normalised, shape)
@@ -178,6 +191,7 @@ def pulsecatcher(mode):
 					if bin_index < bins:
 						histogram[bin_index] 	+= 1
 						histogram_3d[bin_index] += 1 
+						histogram_dist[bin_index] += int(distortion)
 						global_counts  		+= 1	
 						global_cps 		+= 1
 						interval_counts 	+= 1
@@ -214,6 +228,13 @@ def pulsecatcher(mode):
 
 			global_cps = int(global_cps/(te-tla))
 			
+			if mode == 22:
+				histogram_dist_avg = [0] * bins
+				for idx_j in range(bins):
+					if histogram[idx_j] > 0:
+						histogram_dist_avg[idx_j] = int(histogram_dist[idx_j] / histogram[idx_j])
+				fn.write_histogram_json(t0, t1, bins, global_counts, int(elapsed), filename, histogram_dist_avg, coeff_1, coeff_2, coeff_3)
+				fn.write_histogram_csv(t0, t1, bins, global_counts, int(elapsed), filename, histogram_dist_avg, coeff_1, coeff_2, coeff_3, read_size, elapsed)
 			if mode == 2:
 				fn.write_histogram_json(t0, t1, bins, global_counts, int(elapsed), filename, histogram, coeff_1, coeff_2, coeff_3)
 				fn.write_histogram_csv(t0, t1, bins, global_counts, int(elapsed), filename, histogram, coeff_1, coeff_2, coeff_3, read_size, elapsed)

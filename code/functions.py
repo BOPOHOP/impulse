@@ -52,29 +52,25 @@ def normalise_pulse_min_max_h(target_h, s_min, s_max, average):
         amp = 1
     mean = sum(average) / len(average)   
     # normalised = [n - mean for n in average]  
-    # normalised = [n - mean for n in average]  
     # normalised_int = [int(x) for x in normalised]
     # normalised_int = [int((x - mean) * amp) for x in average]
     normalised_int = [((x - mean) * amp) for x in average]
     return normalised_int
-    # Normalises the average pulse shape
 
+    # Normalises the average pulse shape
 def normalise_pulse_h(target_h, average):
+    return normalise_pulse_min_max_h(target_h, min(average), max(average), average)
+
+def normalise_pulse_st(average):
     normalised = []
-    h = max(average) - min(average)
-    if h != 0:
-        amp = target_h / h
-    else:
-        amp = 1
     mean = sum(average) / len(average)   
-    # normalised = [n - mean for n in average]  
-    # normalised = [n - mean for n in average]  
-    # normalised_int = [int(x) for x in normalised]
-    normalised_int = [int((x - mean) * amp) for x in average]
+    normalised = [n - mean for n in average]  
+    normalised_int = [int(x) for x in normalised]
     return normalised_int
 
     # Normalises the average pulse shape
 def normalise_pulse(average):
+    # return normalise_pulse_st(average)
     return normalise_pulse_h(24576, average)
 #n#    normalised = []
 #n#    mean = sum(average) / len(average)   
@@ -90,8 +86,8 @@ def distortion(normalised, shape):
     # distortion = int(math.sqrt(sum(product)))
     # distortion = int((sum(product))/24576)	# 603979776 == 24576**2
 
-    return int((sum(product))/24576)
-    #return int(math.sqrt(sum(product)))
+    #return int((sum(product))/24576)
+    return int(math.sqrt(sum(product)))
 
 
     # Function calculates pulse height
@@ -442,8 +438,13 @@ def stop_recording():
     c      = conn.cursor()
     c.execute(query2)
     conn.commit()
-    time.sleep(3)
+    time.sleep(10)
     # Wait three seconds and set max_counts back to what it was
+    query3    = f"UPDATE settings SET max_counts = {max_counts} WHERE ID = 0;"
+    c         = conn.cursor()
+    c.execute(query3)
+    conn.commit()
+    time.sleep(5)
     query3    = f"UPDATE settings SET max_counts = {max_counts} WHERE ID = 0;"
     c         = conn.cursor()
     c.execute(query3)
