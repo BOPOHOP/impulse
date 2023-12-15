@@ -115,7 +115,7 @@ def pulsecatcher(mode):
 		# Convert hex values into a list of decimal values
 		values = list(wave.struct.unpack("%dh" % (chunk_size * device_channels), data))
 		# Extract every other element (left channel)
-		left_channel = values[::2]
+		left_channel = values[::device_channels]
 		read_size += len(left_channel)
 		# Flip inverts all samples if detector pulses are positive
 		if flip != 1:

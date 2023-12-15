@@ -96,7 +96,7 @@ def shapecatcher():
 			# Convert hex to numbers
 			values = list(wave.struct.unpack("%dh" % (chunk_size * device_channels), data))
 		    # Extract every other element (left channel)
-			left_channel = values[::2]
+			left_channel = values[::device_channels]
 			# Cycle through list of sample strings
 			#for i in range(len(left_channel) - sample_length):
 			for i, sample in enumerate(left_channel[:-sample_length]):	

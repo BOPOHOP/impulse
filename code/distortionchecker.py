@@ -77,7 +77,7 @@ def distortion_finder():
 		data = stream.read(chunk_size, exception_on_overflow=False)
 		values = list(wave.struct.unpack("%dh" % (chunk_size * device_channels), data))
 		# Extract every other element (left channel)
-		left_channel = values[::2]
+		left_channel = values[::device_channels]
 		#global plot_data
 		for i in range(len(left_channel) - sample_length):
 			samples = left_channel[i:i+sample_length]  # Get the first 51 samples
