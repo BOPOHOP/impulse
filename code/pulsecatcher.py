@@ -227,7 +227,7 @@ def pulsecatcher(mode):
 			coeff_3			= settings[20]
 
 			global_cps = int(global_cps/(te-tla))
-			
+			# mode = 22
 			if mode == 22:
 				histogram_dist_avg = [0] * bins
 				for idx_j in range(bins):
@@ -256,7 +256,7 @@ def pulsecatcher(mode):
 				d2 = 0
 				delta_h_avg = 0
 
-			print("elapsed=%4d cps=%7.2f reject_cps=%6.2f %6.2f%% rate=%.2f dist_avg = %10.2f h_mult_avg = %6.2f%% dh=%4.1f" % (
+			print("elapsed=%5d cps=%7.2f reject_cps=%6.2f %6.2f%% rate=%.2f dist_avg = %10.2f h_mult_avg = %6.2f%% dh=%4.1f" % (
 					elapsed, 
 					global_counts/elapsed, rejected_counts/elapsed, reject_percent,
 					read_size/elapsed/1000,

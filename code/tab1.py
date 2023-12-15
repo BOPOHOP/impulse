@@ -92,6 +92,10 @@ def show_tab1():
             options = [
                 {'label':'11 dots', 'value': '11'},
                 {'label':'16 dots', 'value': '16'},
+                {'label':'17 dots', 'value': '17'},
+                {'label':'18 dots', 'value': '18'},
+                {'label':'19 dots', 'value': '19'},
+                {'label':'20 dots', 'value': '20'},
                 {'label':'21 dots', 'value': '21'},
                 {'label':'31 dots', 'value': '31'},
                 {'label':'41 dots', 'value': '41'},

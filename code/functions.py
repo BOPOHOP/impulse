@@ -330,7 +330,8 @@ def detect_pulse_direction(samples):
     if max(samples) >= 3000:
         return 1
     if min(samples) <= -3000:
-        return -1
+        #return -1
+        return 0
     else:
         return 0
 

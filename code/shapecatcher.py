@@ -104,6 +104,8 @@ def shapecatcher():
 				samples = left_channel[i:i+sample_length]  
 				# Function checks if pulse is positive or negative
 				flip = fn.detect_pulse_direction(samples)
+				if flip == 0:
+					continue
 				# Flips samples if pulse is positive
 				samples = [flip * x for x in samples]
 				# Find pulses based only on the peak height being in the middle 80% of 32000
