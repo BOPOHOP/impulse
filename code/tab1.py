@@ -303,7 +303,19 @@ def capture_pulse_shape(n_clicks):
 
     #prevent click on page load
     if n_clicks == 0:
-        fig = {'data': [{}], 'layout': layout}
+        # fig = {'data': [{}], 'layout': layout}
+        shape = fn.load_shape()
+        dots = list(range(len(shape)))
+
+        data = go.Scatter(
+            x          = dots, 
+            y          = shape, 
+            mode       = 'lines+markers',  
+            marker     = {'color': 'black', 'size':4}, 
+            line       = {'color':'blue', 'width':2},
+            showlegend = False)
+
+        fig = go.Figure(data=[data], layout=layout)
         feedback = ''
     else:    
         shape = sc.shapecatcher()
