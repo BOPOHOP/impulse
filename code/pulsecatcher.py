@@ -161,7 +161,8 @@ def pulsecatcher(mode):
 					skip_to = i + int(sample_length * 4 / 5)
 
 					## stabilized s_min
-					s_min = int((s_min + samples[0] + samples[len(samples)-1] + samples[len(samples)-2])/4)
+					# s_min = int((s_min + samples[0] + samples[len(samples)-1] + samples[len(samples)-2])/4)
+					s_min = int((s_min + samples[len(samples)-1] + samples[len(samples)-2])/3)
 
 #07#					# h_mult =  distortion * 0.0000025	#d05 0.0000025/0.02 ok 7.6% 121 391 865
 					# h_mult =  distortion * 0.0000050	#d09 0.0000020/0.015 ok 7.6% 121 391 865
