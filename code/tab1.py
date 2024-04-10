@@ -97,6 +97,7 @@ def show_tab1():
                 {'label':'19 dots', 'value': '19'},
                 {'label':'20 dots', 'value': '20'},
                 {'label':'21 dots', 'value': '21'},
+                {'label':'25 dots', 'value': '25'},
                 {'label':'31 dots', 'value': '31'},
                 {'label':'41 dots', 'value': '41'},
                 {'label':'51 dots', 'value': '51'},
