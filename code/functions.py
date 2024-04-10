@@ -106,12 +106,40 @@ def pulse_height_q(samples):
     y_extremum = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
     return y_extremum-min(samples)
 
+def pulse_height_q3(max_idx, min_idx, samples):
+    x_parab = [1, 2, 3]
+    # print("q3 %d %d of %d" % (max_idx, min_idx, len(samples)))
+
+    y_parab = [samples[max_idx-1], samples[max_idx], samples[max_idx+1]]
+    # x_extremum = max_idx
+    y_extremum = samples[max_idx]
+    if samples[max_idx-1] == samples[max_idx+1]:
+        y_extremum_max = samples[max_idx]
+    else:
+        parab_coeff = np.polyfit(x_parab, y_parab, 2)
+        # x_extremum = - parab_coeff[1] / parab_coeff[0] / 2. # -b/2a
+        # y_extremum_max = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
+        y_extremum_max = parab_coeff[2] - parab_coeff[1] * parab_coeff[1] / parab_coeff[0] / 4. # c - b^2/(4*a)
+
+    y_parab = [samples[min_idx-1], samples[min_idx], samples[min_idx+1]]
+    # x_extremum = min_idx
+    y_extremum = samples[min_idx]
+    if samples[min_idx-1] == samples[min_idx+1]:
+        y_extremum_min = samples[min_idx]
+    else:
+        parab_coeff = np.polyfit(x_parab, y_parab, 2)
+        # x_extremum = - parab_coeff[1] / parab_coeff[0] / 2.
+        # y_extremum_min = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
+        y_extremum_min = parab_coeff[2] - parab_coeff[1] * parab_coeff[1] / parab_coeff[0] / 4. # c - b^2/(4*a)
+
+    return y_extremum_max - y_extremum_min
+
 def pulse_height_q2(m_idx, s_min, samples):
 #    if m_idx == 0 or m_idx == len(samples)-1:
 #    	return max(samples)-s_min
     x_parab = [1, 2, 3]
     y_parab = [samples[m_idx-1], samples[m_idx], samples[m_idx+1]]
-    x_extremum = m_idx
+    # x_extremum = m_idx
     y_extremum = samples[m_idx]
     if samples[m_idx-1] == samples[m_idx+1]:
         return y_extremum-s_min
@@ -121,9 +149,10 @@ def pulse_height_q2(m_idx, s_min, samples):
 #check#        print("parabola k", samples[m_idx-1], samples[m_idx], samples[m_idx+1], 
 #check#	    " -> ", parab_coeff[0], parab_coeff[1], parab_coeff[2])
 #check#        return 0
-    x_extremum = - parab_coeff[1] / parab_coeff[0] / 2.
+    # x_extremum = - parab_coeff[1] / parab_coeff[0] / 2.
 #check#    if x_extremum >= 1. and x_extremum <= 3.:
-    y_extremum = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
+    # y_extremum = parab_coeff[0] * x_extremum * x_extremum + parab_coeff[1] * x_extremum + parab_coeff[2]
+    y_extremum = parab_coeff[2] - parab_coeff[1] * parab_coeff[1] / parab_coeff[0] / 4. # c - b^2/(4*a)
 #check#    else:
 #check#        print("parabola x", samples[m_idx-1], samples[m_idx], samples[m_idx+1], 
 #check#	    " -> ", parab_coeff[0], parab_coeff[1], parab_coeff[2], "x y: ", x_extremum, y_extremum)

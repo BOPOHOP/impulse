@@ -22,6 +22,7 @@ global_cps      = 0
 global_counts	= 0
 grand_cps	= 0
 read_size	= 0
+peak_to_min	= 0
 
 # Function reads audio stream and finds pulses then outputs time, pulse height and distortion
 def pulsecatcher(mode):
@@ -71,6 +72,9 @@ def pulsecatcher(mode):
 	samples 	= []
 	pulses 		= []
 	left_data 	= []
+	min_after_max = 0 # 1 - min just after slope
+	min_after_max = get_min_state(shape)
+
 
 	p = pyaudio.PyAudio()
 
@@ -176,7 +180,13 @@ def pulsecatcher(mode):
 #DD#					h_mult =  distortion * 2.2e-10 #d13 2.2e-10/**2 ok 7.7% 141/457/1005 2048/10/740v d:50/110000000
 #DD#					h_mult =  distortion * 5.4e-6 #d13 2.2e-10/**2 ok 7.7% 141/457/1005 2048/10/740v d:50/110000000
 					h_old = height
-					height = fn.pulse_height_q2(peak, s_min, samples)
+					# print("pos: %d %d %d of %d\n" % (peak, peakshift, peak + pulsecatcher.peak_to_min, len(samples)));
+					if (s_min == samples[peak + pulsecatcher.peak_to_min] and min_after_max == 1):
+						# print("double q amp\n");
+						height = fn.pulse_height_q3(peak, peak + pulsecatcher.peak_to_min, samples)
+					else:
+						height = fn.pulse_height_q2(peak, s_min, samples)
+
 					h_mult = 0
 					if height > 0:
 						h_mult = (height - h_old) / height
@@ -277,3 +287,39 @@ def pulsecatcher(mode):
 	print("pulsecatcher stop")
 	return						
 											
+def get_min_state(shape):
+    min_pos = 0
+    max_pos = 0
+    p_max = shape[0]
+    p_min = shape[0]
+    slope_end_pos = 0
+    for i in range(len(shape)):
+        if shape[i] > p_max:
+            max_pos = i
+            p_max = shape[i]
+        if shape[i] < p_min:
+            min_pos = i
+            p_min = shape[i]
+
+    for i in range(max_pos, len(shape) - max_pos):
+        if shape[i] <= shape[i+1]:
+            slope_end_pos = i
+            break
+
+    if min_pos < max_pos:
+        min_after_max = 0
+    else:
+        min_after_max = 1
+        for i in range(max_pos, min_pos):
+            if shape[i] <= shape[i+1]:
+                min_after_max = 2
+                # print("tail end %d %d %d" % (i, shape[i], shape[i+1]))
+                break
+            else:
+                slope_end_pos = i + 1
+                # print("in tail %d %d %d" % (i, shape[i], shape[i+1]))
+
+    print("shape: max %d@%d min %d@%d slope end %d; min_after_max: %d" % 
+            (p_max, max_pos, p_min, min_pos, slope_end_pos, min_after_max))
+    pulsecatcher.peak_to_min = min_pos - max_pos
+    return min_after_max
